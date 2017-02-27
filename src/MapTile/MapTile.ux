@@ -1,0 +1,29 @@
+<Panel ux:Class="MapTile">
+	<float ux:Property="Latitude" />
+	<float ux:Property="Longitude" />
+	<int ux:Property="Zoom" />
+	<JavaScript>
+		var Observable=require('FuseJS/Observable');
+		exports.url = Observable('http://a.osm.maptiles.xyz/0/0/0.png');
+		var component = this;
+
+		this.Zoom.onValueChanged(module, build_url);
+		this.Latitude.onValueChanged(module, build_url);
+		this.Longitude.onValueChanged(module, build_url);
+
+		function build_url() {
+			function long2tile(lon,zoom) { return (Math.floor((lon+180)/360*Math.pow(2,zoom))); }
+			function lat2tile(lat,zoom)  { return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); }
+
+			var url = 'http://a.osm.maptiles.xyz/' + 
+					component.Zoom.value + '/'+ 
+					long2tile(component.Longitude.value, component.Zoom.value) +'/'+
+					lat2tile(component.Latitude.value, component.Zoom.value) + '.png';
+
+			if (url !== exports.url.value) {
+				exports.url.value = url;
+			}
+		}
+	</JavaScript>
+	<Image Url="{url}" />
+</Panel>
